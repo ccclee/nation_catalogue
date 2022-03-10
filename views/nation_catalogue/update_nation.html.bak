@@ -1,0 +1,50 @@
+{{response.files.append(URL('static', 'css/customForm.css'))}}
+{{extend 'layout.html'}}
+<style>
+    /* {{include '../static/css/customForm.css'}} */
+    /* ID should be hidden */
+    #nation_id__row{
+        display: none;
+    }
+    .nation_is_deleted__row{
+        display:none;
+    }
+    /* Button for updating nation css */
+    .customButton{
+        border: 2px solid grey;
+        -webkit-box-shadow:inset 0 0 8px #000;
+        -moz-box-shadow:inset 0 0 8px #000;
+        box-shadow:inset 0 0 8px #000;
+        color: white;
+        margin-bottom:10px;
+    }
+    .deleteNation{
+        background-color: red;
+    }
+
+</style>
+<div id="formBox">
+    <h1>Update Nation</h1>
+    <hr>
+    <!-- Automatic form from the controller -->
+    {{=form}}
+    <button class="customButton deleteNation" data-attr="{{=nation_id}}">
+      Delete Nation Data
+    </button>
+</div>
+<script>
+    // Remove the ID, should not display to the user.
+    $("#nation_id__row").remove();
+    $("#nation_is_deleted__row").prop("hidden", "hidden");
+    
+    $(".deleteNation").on('click', function(){
+           // If confirmed, delete
+           if (confirm("Are you sure you want to delete this nation data?") == true) {
+             // Delete
+             var url = '{{=URL('deleteNation')}}' + '?value=' + $(this).attr("data-attr");
+             console.log(url);
+             ajax(url);
+             window.location.href = "/nation_catalogue/nation_catalogue/view/";
+           } 
+    });
+</script>

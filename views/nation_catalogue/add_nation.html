@@ -1,0 +1,12 @@
+{{response.files.append(URL('static', 'css/customForm.css'))}}
+{{extend 'layout.html'}}
+<div id="formBox">
+    <h1>Add Nation</h1>
+    <hr>
+    <!-- Automatic form from the controller -->
+    {{=form}}
+</div>
+<script>
+   // Hide the deletion content from the user. Use deletion button instead
+   $("#nation_is_deleted__row").prop("hidden", "hidden");
+</script>

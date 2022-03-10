@@ -1,0 +1,228 @@
+{{extend 'layout.html'}}
+<style>
+    /* Image flag CSS */
+    .nation_flag{
+        border: 1px solid grey;
+        padding: 10px;
+        -webkit-box-shadow:inset 0 0 3px #000;
+        -moz-box-shadow:inset 0 0 3px #000;
+        box-shadow:inset 0 0 3px #000;
+        background-color: #EEF6FA;
+        margin-left:2px;
+        height: 800px;
+    }
+    
+    .descriptionDiv{
+        font-size:18px;
+    }
+    
+    .catalogueRow{
+        -webkit-box-shadow:inset 0 0 3px #000;
+        -moz-box-shadow:inset 0 0 3px #000;
+        box-shadow:inset 0 0 3px #000;
+        padding: 10px;
+    }
+    /* Button for updating nation css */
+    .customButton{
+        border: 2px solid grey;
+        -webkit-box-shadow:inset 0 0 8px #000;
+        -moz-box-shadow:inset 0 0 8px #000;
+        box-shadow:inset 0 0 8px #000;
+        color: white;
+        margin-bottom:10px;
+    }
+    .addNation, .updateNation{
+        background-color: green;
+    }
+    .deleteNation{
+        background-color: red;
+    }
+    .filterNation, .filterButton{
+        background-color: blue;
+    }
+    .filterNationDiv{
+        display:none;
+    }
+    input[type="number"]{
+        width:100px;
+    }
+    .filterDiv{
+        padding:20px;
+    }
+    .filterInsideDiv{
+        padding: 10px;
+        margin: 10px;
+        display:inline-block;
+        font-size:20px;
+    }
+    
+</style>
+<h1>
+    Nation Catalogue
+</h1>
+<hr>
+<button class="customButton addNation">
+    Add Nation
+</button>
+<button class="customButton filterNation">
+    Filter
+</button>
+<div class="filterNationDiv">
+    <h2>
+        Filter
+    </h2>
+    <div class='filterDiv'>
+       
+        <div class='filterInsideDiv'>
+            <b>Nation Type:</b>
+                <select name="nationType" id="nationType">
+                  <option value="All">All</option>
+                  <option value="Modern">Modern</option>
+                  <option value="Medieval">Medieval</option>
+                  <option value="Ancient">Ancient</option>
+                </select>
+        </div>
+       
+        <div class='filterInsideDiv'>
+            <b>Select Year:</b> 
+                <input type="number" id="year" placeholder="1000">  
+                 <select name="yearType" id="yearType">
+                  <option value="AD">AD</option>
+                  <option value="BC">BC</option>
+                </select>
+           
+        </div>
+        
+        <div id="redMessage" style="color:red">
+             Please enter years
+        </div>
+        
+        <button class="customButton filterButton">
+            Submit Filter
+        </button>
+        
+    </div>
+    
+</div>
+<div class="nationCatalogue">
+    {{ for x in rows: }}
+    <div class='row catalogueRow'>
+        <img class='col col-lg-4 col-md-4 col-sm-4 nation_flag' src='/nation_catalogue/static/flags/{{=x.nation_flag}}' alt='nation flag'/>
+        <div class='col col=lg-8'>
+            <h1>
+                <b><a href='{{=x.nation_wikipedia_link}}' target='_new'>{{=x.nation_name}}</a></b>
+            </h1>
+            <hr>
+            <div class="descriptionDiv">
+                <p>
+                    <b>Description: </b>{{=x.nation_description}}
+                </p>
+                <!-- Format it with commas -->
+                <p>
+                    <b>Size: </b>{{= '{:,}'.format(x.nation_size)}} km<sup>2</sup>
+                </p>
+                <p>
+                    <b>Nation Type: </b>{{=x.nation_type}}
+                </p>
+                <p>
+                    <b>Lifespan: </b> {{=x.nation_birth_year}} {{=x.nation_year_type_birth_year}} - {{=x.nation_end_year}} {{=x.nation_year_type_end_year}} 
+                </p>
+                <p>
+                    <button class="customButton updateNation" data-attr="{{=x.id}}">
+                        Update Nation Data
+                    </button>
+                    <button class="customButton deleteNation" data-attr="{{=x.id}}">
+                        Delete Nation Data
+                    </button>
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- End of for loop -->
+    {{pass}}
+</div>
+
+
+<script>
+     $("#redMessage").hide();
+     /**** 
+     FILTER FUNCTIONS
+     ****/
+    
+    // When clicked, show the the div, else keep it hidden
+    $(".filterNation").on('click',function(){
+      if ($(".filterNationDiv").is(":hidden")){
+         $(".filterNationDiv").show();
+      }
+      else{
+        $(".filterNationDiv").hide();
+      }
+    });
+   
+    // AJAX function for filtering
+    $(".filterButton").on("click", function(){
+       var nationType = $("#nationType").val();
+       var year = parseInt($("#year").val());
+       var yearType = $("#yearType").val();
+
+       // if verified 
+       if (!(isNaN(year))){
+           $("#redMessage").hide();
+           console.log("verified");
+           $.ajax({
+                url:"filterNation", //changed into temp.html page
+                type:'POST',
+                data:{
+                    "nationType":nationType,
+                    "year":year,
+                    "yearType":yearType
+                },
+                success:function(data){
+                   console.log(data);
+                    // If empty, display an empty query result
+                   if (data === "empty query"){
+                       $(".nationCatalogue").html("You have selected an empty range of nations. Please filter again for results");
+                   }
+                    // Else replace with return data
+                   else {
+                       $(".nationCatalogue").html(data);
+                       
+                   }
+                }
+   
+           });
+       }
+       else {
+        console.log("Ideally, if both values are empty, it should just reset to display everything, did not do this");
+        $("#redMessage").show();
+       }
+    }); 
+                          
+    /****
+    GENERAL FUNCTIONS
+    ****/
+    // When add nation button is clicked
+    $(".addNation").on('click',function(){
+       window.location.href = "/nation_catalogue/nation_catalogue/add_nation";
+    });
+    // Loop through each class and create a redirect
+    $(".updateNation").each(function(){
+       $(this).on('click', function(){
+         window.location.href = "/nation_catalogue/nation_catalogue/update_nation/" + $(this).attr("data-attr");
+        });
+    });
+
+    // Loop through each class and create a confirmation delete option
+    $(".deleteNation").each(function(){
+       $(this).on('click', function(){
+           // If confirmed, delete
+           if (confirm("Are you sure you want to delete this nation data?") == true) {
+             // Delete
+             var url = '{{=URL('deleteNation')}}' + '?value=' + $(this).attr("data-attr");
+             ajax(url);
+             window.location.href = "/nation_catalogue/nation_catalogue/view/";
+           } 
+        });
+    });
+   
+</script>

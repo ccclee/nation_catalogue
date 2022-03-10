@@ -1,0 +1,11 @@
+{{extend 'layout.html'}}
+<h1>{{=msg}}</h1>
+<h2>
+     You will now be redirected to the homepage!
+</h2>
+
+<script>
+    setTimeout(function () {
+        window.location.href = "/nation_catalogue/nation_catalogue/view";
+    }, 5000);
+</script>
